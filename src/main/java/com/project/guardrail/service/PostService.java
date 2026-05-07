@@ -2,9 +2,7 @@ package com.project.guardrail.service;
 
 import com.project.guardrail.dto.request.CreatePostRequest;
 import com.project.guardrail.dto.response.PostResponse;
-import com.project.guardrail.entity.Bot;
 import com.project.guardrail.entity.Post;
-import com.project.guardrail.entity.User;
 import com.project.guardrail.entity.enums.AuthorType;
 import com.project.guardrail.repository.BotRepository;
 import com.project.guardrail.repository.PostRepository;
@@ -27,9 +25,19 @@ public class PostService {
     private final ViralityService viralityService;
 
     @Transactional
+    public void likePost(Long postId, com.project.guardrail.dto.request.CreateLikeRequest request) {
+
+        validateAuthor(request.getAuthorId(), request.getAuthorType());
+
+        if (request.getAuthorType() == AuthorType.USER) {
+            viralityService.addHumanLikeScore(postId);
+        }
+    }
+
+    @Transactional
     public PostResponse createPost(CreatePostRequest request) {
 
-        validateAuthor(request.getAuthorId(),request.getAuthorType());
+        validateAuthor(request.getAuthorId(), request.getAuthorType());
 
         Post post = Post.builder()
                 .authorId(request.getAuthorId())
@@ -49,32 +57,33 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
                         new RuntimeException("Post not found"));
-
         return mapToResponse(post);
     }
 
-    private void validateAuthor(Long authorId,AuthorType authorType) {
+    private void validateAuthor(Long authorId, AuthorType authorType) {
 
         if (authorType == AuthorType.USER) {
 
-            User user = userRepository.findById(authorId)
+            userRepository.findById(authorId)
                     .orElseThrow(() ->
                             new RuntimeException("User not found"));
 
         } else {
 
-            Bot bot = botRepository.findById(authorId)
+            botRepository.findById(authorId)
                     .orElseThrow(() ->
                             new RuntimeException("Bot not found"));
         }
     }
 
     private PostResponse mapToResponse(Post post) {
+        System.out.println("Post ID: " + post.getId());
 
         Long viralityScore =
                 viralityService.getViralityScore(post.getId());
+        System.out.println("viralityScore: " + viralityScore);
 
-        return PostResponse.builder()
+        PostResponse response = PostResponse.builder()
                 .id(post.getId())
                 .authorId(post.getAuthorId())
                 .authorType(post.getAuthorType())
@@ -82,5 +91,7 @@ public class PostService {
                 .viralityScore(viralityScore)
                 .createdAt(post.getCreatedAt())
                 .build();
+        System.out.println("response - " + response);
+        return response;
     }
 }

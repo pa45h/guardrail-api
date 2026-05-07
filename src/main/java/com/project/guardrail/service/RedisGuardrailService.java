@@ -17,9 +17,18 @@ public class RedisGuardrailService {
     public boolean incrementBotReplyCount(Long postId) {
         String key = "post:" + postId + ":bot_count";
 
-        Long count = redisTemplate.opsForValue().increment(key, 1);
+        Long count = redisTemplate.opsForValue().increment(key);
 
-        return count != null && count <= MAX_BOT_REPLIES;
+        if (count == null) {
+            return false;
+        }
+
+        if (count > MAX_BOT_REPLIES) {
+            redisTemplate.opsForValue().decrement(key);
+            return false;
+        }
+
+        return true;
     }
 
     public boolean checkCooldown(Long botId, Long humanId) {

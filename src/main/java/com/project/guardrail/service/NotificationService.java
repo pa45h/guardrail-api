@@ -18,8 +18,40 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     public void queueNotification(Long userId, String message) {
+
+        System.out.println("QUEUE NOTIFICATION CALLED");
+
         String key = buildNotificationQueueKey(userId);
-        redisTemplate.opsForList().rightPush(key, message);
+
+        System.out.println("KEY: " + key);
+
+        redisTemplate.opsForSet()
+                .add("pending_notification_users", userId);
+
+        redisTemplate.opsForList()
+                .rightPush(key, message);
+
+        Long listSize =
+                redisTemplate.opsForList().size(key);
+
+        System.out.println("LIST SIZE: " + listSize);
+
+        Boolean exists =
+                redisTemplate.hasKey(key);
+
+        System.out.println("KEY EXISTS: " + exists);
+    }
+
+    public void handleBotNotification(Long userId, String message) {
+        String cooldownKey = "user:" + userId + ":notif_cooldown";
+
+        Boolean sentNow = redisTemplate.opsForValue().setIfAbsent(cooldownKey, "ACTIVE", java.time.Duration.ofMinutes(15));
+
+        if (Boolean.TRUE.equals(sentNow)) {
+            System.out.println("Push Notification Sent to User: " + message);
+        } else {
+            queueNotification(userId, message);
+        }
     }
 
     public void processNotifications(Long userId) {
@@ -35,13 +67,14 @@ public class NotificationService {
 
         String summarizedMessage = buildSummaryMessage(notifications);
 
+        System.out.println("Summarized Push Notification: " + summarizedMessage);
+
         Notification notification = Notification.builder()
                 .recipientUserId(userId)
                 .message(summarizedMessage)
                 .processed(true)
                 .createdAt(LocalDateTime.now())
                 .build();
-        ;
 
         notificationRepository.save(notification);
 
@@ -49,9 +82,18 @@ public class NotificationService {
     }
 
     private String buildSummaryMessage(List<Object> notifications) {
+        if (notifications == null || notifications.isEmpty()) {
+            return "You have new notifications.";
+        }
+
         int totalNotifications = notifications.size();
 
-        return "You have " + totalNotifications + " new notifications.";
+        if (totalNotifications == 1) {
+            return notifications.get(0).toString();
+        }
+
+        String first = notifications.get(0).toString();
+        return first + " and [" + (totalNotifications - 1) + "] others interacted with your posts.";
     }
 
     private String buildNotificationQueueKey(Long userId) {

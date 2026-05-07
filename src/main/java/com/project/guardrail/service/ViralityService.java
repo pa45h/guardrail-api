@@ -27,15 +27,32 @@ public class ViralityService {
     }
 
     public Long getViralityScore(Long postId) {
+
         String key = buildViralityKey(postId);
 
-        Object score = redisTemplate.opsForValue().get(key);
+        Object score =
+                redisTemplate.opsForValue().get(key);
 
         if (score == null) {
             return 0L;
         }
 
-        return Long.parseLong(score.toString());
+        if (score instanceof Long) {
+            return (Long) score;
+        }
+
+        if (score instanceof Integer) {
+            return ((Integer) score).longValue();
+        }
+
+        if (score instanceof String) {
+            return Long.valueOf((String) score);
+        }
+
+        throw new RuntimeException(
+                "Unsupported Redis score type: "
+                        + score.getClass()
+        );
     }
 
     private Long incrementScore(Long postId, int incrementValue) {

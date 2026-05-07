@@ -1,0 +1,784 @@
+{
+  "info": {
+    "_postman_id": "c3d1b4f7-4b0c-4d2f-9a54-guardrail0001",
+    "name": "GuardRail API - Complete Testing Suite",
+    "description": "Comprehensive API collection for GuardRail posts, comments, likes, guardrails, and concurrency testing. Tests thread safety with 100+ bot reply cap and notification batching.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Setup - User Management",
+      "item": [
+        {
+          "name": "Create User - Alice (ID: 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"isPremium\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create User - Bob (ID: 2)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"bob\",\n  \"isPremium\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Setup - Bot Management",
+      "item": [
+        {
+          "name": "Create Bot - BotX (ID: 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BotX\",\n  \"personaDescription\": \"Helpful AI assistant for general questions\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Bot - BotY (ID: 2)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BotY\",\n  \"personaDescription\": \"Technical expert bot for code reviews\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bots"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List All Bots",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/bots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bots"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Core Features - Posts",
+      "item": [
+        {
+          "name": "Create Post by User Alice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 1,\n  \"authorType\": \"USER\",\n  \"content\": \"What is the best approach for microservices architecture?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Post with Virality Score",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Like Post by User Bob",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 2,\n  \"authorType\": \"USER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "like"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Core Features - Comments",
+      "item": [
+        {
+          "name": "Add Comment - Bot Reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 1,\n  \"authorType\": \"BOT\",\n  \"content\": \"Microservices should have proper API boundaries and clear contracts.\",\n  \"parentCommentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Comment - User Reply to Bot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 2,\n  \"authorType\": \"USER\",\n  \"content\": \"Great insights! What about database design?\",\n  \"parentCommentId\": \"1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Comments on Post",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guardrails - Horizontal Cap Test",
+      "item": [
+        {
+          "name": "INFO: Horizontal Cap Test (Max 100 Bot Replies)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add 101st Bot Comment - SHOULD FAIL with 429",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 1,\n  \"authorType\": \"BOT\",\n  \"content\": \"This bot comment should be rejected (cap at 100)\",\n  \"parentCommentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guardrails - Vertical Cap Test",
+      "item": [
+        {
+          "name": "Add Deep Nested Comment (Depth Test)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 2,\n  \"authorType\": \"USER\",\n  \"content\": \"Level 2 reply\",\n  \"parentCommentId\": \"2\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "INFO: Max Depth is 20 Levels",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://example.com",
+              "host": [
+                "example.com"
+              ],
+              "path": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guardrails - Cooldown Cap Test",
+      "item": [
+        {
+          "name": "INFO: Cooldown Test (10 min between bot-human interactions)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://example.com",
+              "host": [
+                "example.com"
+              ],
+              "path": []
+            }
+          }
+        },
+        {
+          "name": "Bot 1 Comments on Alice's Post - FIRST (SUCCESS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 1,\n  \"authorType\": \"BOT\",\n  \"content\": \"First bot interaction (cooldown starts)\",\n  \"parentCommentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bot 1 Comments Again on Alice's Post - SHOULD FAIL with 429",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 1,\n  \"authorType\": \"BOT\",\n  \"content\": \"This should fail due to 10-minute cooldown\",\n  \"parentCommentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Virality Scoring",
+      "item": [
+        {
+          "name": "Check Virality Score After Interactions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "INFO: Virality Scoring Rules",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://example.com",
+              "host": [
+                "example.com"
+              ],
+              "path": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications & Batching",
+      "item": [
+        {
+          "name": "INFO: Notification Batching (Every 5 minutes)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://example.com",
+              "host": [
+                "example.com"
+              ],
+              "path": []
+            }
+          }
+        },
+        {
+          "name": "Create Post for Notification Testing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 2,\n  \"authorType\": \"USER\",\n  \"content\": \"Testing notification batching features\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bot Comments (First - Immediate Notification)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 1,\n  \"authorType\": \"BOT\",\n  \"content\": \"First bot comment (triggers immediate notification)\",\n  \"parentCommentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{notifPostId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{notifPostId}}",
+                "comments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bot Comments (Second - Queued Notification)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 2,\n  \"authorType\": \"BOT\",\n  \"content\": \"Second bot comment (queued for batch processing)\",\n  \"parentCommentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{notifPostId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{notifPostId}}",
+                "comments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Concurrency Testing - Race Conditions",
+      "item": [
+        {
+          "name": "INFO: Race Condition Test Instructions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://example.com",
+              "host": [
+                "example.com"
+              ],
+              "path": []
+            }
+          }
+        },
+        {
+          "name": "Create Post for Race Condition Testing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 1,\n  \"authorType\": \"USER\",\n  \"content\": \"Testing concurrent bot replies (target: exactly 100)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Concurrent Bot Reply 1 - Max Cap Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Expected: First 100 should succeed, rest fail",
+                  "if (pm.response.code === 201) {",
+                  "  console.log('Comment created - within cap');",
+                  "} else if (pm.response.code === 429) {",
+                  "  console.log('429 Too Many Requests - cap exceeded');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authorId\": 1,\n  \"authorType\": \"BOT\",\n  \"content\": \"Concurrent bot reply\",\n  \"parentCommentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{racePostId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{racePostId}}",
+                "comments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify Final Count (Should be 100)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{racePostId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{racePostId}}",
+                "comments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Advanced - View Statistics",
+      "item": [
+        {
+          "name": "Get Post Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Comments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "postId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "notifPostId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "racePostId",
+      "value": "3",
+      "type": "string"
+    }
+  ]
+}
+

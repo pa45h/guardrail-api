@@ -18,5 +18,7 @@ public class PostResponse {
 
     private String content;
 
+    private Long viralityScore;
+
     private LocalDateTime createdAt;
 }

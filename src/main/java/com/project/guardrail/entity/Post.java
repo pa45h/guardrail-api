@@ -20,7 +20,7 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String authorId;
+    private Long authorId;
 
     @Enumerated(EnumType.STRING)
     private AuthorType authorType;
